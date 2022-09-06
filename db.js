@@ -1,10 +1,8 @@
 const { MongoClient } = require("mongodb");
 const config = require("./config.json");
 
-const { url } = config.db;
+const { url, dbName } = config.db;
 const client = new MongoClient(url);
-
-const dbName = "vismunDB";
 
 let cache = {};
 async function load() {
