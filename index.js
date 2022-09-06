@@ -43,6 +43,15 @@ app.post("/signup", async (req, res) => {
     res.send("success");
 });
 
+// TODO: THIS IS A TEST, DO NOT EXPOSE BACKEND
+app.get("/users/:email", async (req, res) => {
+    const { email } = req.params;
+
+    const user = new User();
+    user.load({ email });
+    res.send(user);
+});
+
 app.listen(3000, async () => {
     console.log("server started");
     await db.load();
