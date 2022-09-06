@@ -19,9 +19,12 @@ class User extends Model {
         this.teacher = false;
     }
 
-    async setPassword(password) {
-        const salt = await bcrypt.genSalt(10);
-        this.password = await bcrypt.hash(password, salt);
+    setPassword(password) {
+        this.password = bcrypt.hashSync(password, 12);
+    }
+
+    verifyPassword(plainTextPassword) {
+        return bcrypt.compareSync(plainTextPassword, this.password);
     }
 }
 
