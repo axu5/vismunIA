@@ -10,21 +10,21 @@ async function load() {
 
     const db = client.db(dbName);
 
-    const users = db.collection("users");
-    const files = db.collection("files");
-    const sessions = db.collection("sessions");
-    const topics = db.collection("topics");
+    const collections = [
+        "users",
+        "files",
+        "sessions",
+        "topics",
+        "user_sessions",
+    ];
 
-    cache = {
-        users,
-        files,
-        sessions,
-        topics,
-    };
+    for (const collectionName of collections) {
+        cache[collectionName] = db.collection(collectionName);
+    }
 }
 
-function getCollection(collection) {
-    return cache[collection];
+function getCollection(collectionName) {
+    return cache[collectionName];
 }
 
 module.exports = {

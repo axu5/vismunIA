@@ -1,55 +1,38 @@
 const express = require("express");
+const cookieParser = require("cookie-parser");
 const app = express();
 const db = require("./db");
 const User = require("./models/user");
+const auth = require("./routes/auth");
 
 app.use(express.json());
+app.use(cookieParser());
 
 app.get("/", async (req, res) => {
     res.send("hello world!");
 });
 
-app.post("/signup", async (req, res) => {
-    const { name, email, password } = req.body;
+app.use("/auth", auth);
 
-    if (!(name && email && password)) {
-        return res.status(400).send({
-            error: "Name, email, and password must be provided",
-        });
-    }
+// app.post("/login", async (req, res) => {
+//     const { email, password } = req.body;
 
-    if (email.includes(" ") || !email.endsWith("@verdala.org")) {
-        return res.status(400).send({
-            error: "Invalid email, must be a valid verdala email address",
-        });
-    }
+//     // get user
+//     const user = new User();
+//     user.load({ email });
 
-    const users = db.getCollection("users");
+//     // if email or password is wrong, display same error message
+//     if (!user || user.verifyPassword(password)) {
+//         return res.json({
+//             error: "Incorrect email or password",
+//         });
+//     }
 
-    const existingUser = await users.findOne({
-        email,
-    });
+//     // set refresh token
+// });
 
-    if (existingUser) {
-        return res.status(400).send({
-            error: "User with that email or name already exists",
-        });
-    }
-
-    const user = new User(name, email);
-    await user.setPassword(password);
-    await user.save();
-
-    res.send("success");
-});
-
-// TODO: THIS IS A TEST, DO NOT EXPOSE BACKEND
-app.get("/users/:email", async (req, res) => {
-    const { email } = req.params;
-
-    const user = new User();
-    user.load({ email });
-    res.send(user);
+app.get("/dashboard", async (req, res) => {
+    const { accessToken, refreshToken } = req.cookies;
 });
 
 app.listen(3000, async () => {

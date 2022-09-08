@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
 const Model = require("../model");
+const { v4: uuid } = require("uuid");
 
 class User extends Model {
     constructor(name, email) {
@@ -7,6 +8,7 @@ class User extends Model {
 
         this.name = name;
         this.email = email;
+        this.userId = uuid();
         this.password = "";
 
         this.createdAt = new Date();
