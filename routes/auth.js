@@ -40,7 +40,7 @@ router.post("/signup", async (req, res) => {
     tokens.save();
 
     await user.save();
-    res.send("success");
+    res.send({ success: true });
 });
 
 router.post("/login", async (req, res) => {
@@ -62,6 +62,8 @@ router.post("/login", async (req, res) => {
     }
 
     const tokens = new Tokens(user.userId);
+    await tokens.updateVersion();
+    console.log("Token version:", tokens.version);
     tokens.setTokens(res);
 
     res.send({ success: true });
@@ -83,7 +85,20 @@ router.delete("/logout", async (req, res) => {
     res.send({ success: true });
 });
 
-router.delete("/logout-all", async (req, res) => {});
+router.delete("/logout-all", async (req, res, next) => {
+    try {
+        const { refreshToken } = req.cookies;
+        if (!refreshToken) throw "bad request";
+        await Tokens.verifyRefreshToken(refreshToken);
+        await Tokens.updateVersion(refreshToken);
+        Tokens.delete(res);
+
+        // update refresh token version
+        res.send({ success: true });
+    } catch (error) {
+        next(error);
+    }
+});
 
 function validEmail(email) {
     return !email.includes(" ") && email.endsWith("@verdala.org");

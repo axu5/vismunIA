@@ -13,6 +13,8 @@ const tokenNames = {
 };
 
 class Tokens extends Model {
+    static dataCollectionName = "user_sessions";
+
     static accessTokenExpiresIn = 5000;
     static refreshTokenExpiresIn = 31536000000; // 365 * 24 * 60 * 60 * 1000;
 
@@ -27,7 +29,7 @@ class Tokens extends Model {
      * @param {string} userId the id of the user for storing in database and prevention of duplicating token
      */
     constructor(userId) {
-        super("user_sessions");
+        super(Tokens.dataCollectionName);
         super.excludeParam("refreshToken");
         super.excludeParam("accessToken");
 
@@ -35,28 +37,48 @@ class Tokens extends Model {
 
         this.version = 0;
 
-        // Create tokens
+        this.signRefreshToken();
+        this.signAccessToken();
+    }
+
+    async updateVersion() {
+        // Get version from database
+        const sessionsCollection = db.getCollection(
+            this.collectionName
+        );
+        const latestVersion = await sessionsCollection.findOne({
+            userId: this.userId,
+        });
+        this.version = latestVersion.version;
+        this.signRefreshToken();
+    }
+
+    signRefreshToken() {
         const refreshPayload = {
             version: this.version,
         };
-        const accessPayload = {};
-
-        // Options
         const refreshOptions = {
             expiresIn: Tokens.refreshTokenExpiresIn,
-            audience: userId,
+            audience: this.userId,
         };
-        const accessOptions = {
-            expiresIn: Tokens.accessTokenExpiresIn,
-            audience: userId,
-        };
-
-        // Add access and refresh tokens to the instance
         this.refreshToken = jwt.sign(
             refreshPayload,
             refreshKey,
             refreshOptions
         );
+    }
+
+    signAccessToken() {
+        // Create tokens
+        const accessPayload = {};
+
+        // Options
+        const accessOptions = {
+            expiresIn: Tokens.accessTokenExpiresIn,
+            audience: this.userId,
+        };
+
+        // Add access and refresh tokens to the instance
         this.accessToken = jwt.sign(
             accessPayload,
             tokenKeys,
@@ -75,6 +97,22 @@ class Tokens extends Model {
         });
     }
 
+    static async updateVersion(token) {
+        // @ts-ignore get user id
+        const { aud: userId } = jwt.decode(token, refreshKey);
+        // in sessions database increment version
+        const sessionsCollection = db.getCollection(
+            Tokens.dataCollectionName
+        );
+        const { version } = await sessionsCollection.findOne({
+            userId,
+        });
+        await sessionsCollection.updateOne(
+            { userId },
+            { $set: { version: version + 1 } }
+        );
+    }
+
     /**
      * @param {string} refreshToken
      *
@@ -91,20 +129,21 @@ class Tokens extends Model {
                             "unauthorized (incorrect token)"
                         );
                     }
-                    // Extract userId from audience
+                    // @ts-ignore Extract userId from audience
                     const userId = payload.aud;
                     // @ts-ignore
                     const { version } = jwt.decode(
                         refreshToken,
+                        // @ts-ignore
                         refreshKey
                     );
 
                     // Check that refresh token version is correct
                     // 1. Get correct token version from DB
-                    const token = new Tokens(userId);
-                    await token.load({ userId });
+                    const correctTokenVersion =
+                        await Tokens.getVersion(userId);
                     // 2. If token versions do not match return unauthorized
-                    if (token.version !== version) {
+                    if (correctTokenVersion !== version) {
                         return reject("unauthorized (token version)");
                     }
 
@@ -118,6 +157,12 @@ class Tokens extends Model {
     static delete(res) {
         res.cookie(tokenNames.access, "");
         res.cookie(tokenNames.refresh, "");
+    }
+
+    static async getVersion(userId) {
+        const sessionsCollection = db.getCollection("user_sessions");
+        const result = await sessionsCollection.findOne({ userId });
+        return result.version;
     }
 }
 

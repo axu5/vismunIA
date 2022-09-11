@@ -2,8 +2,9 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const app = express();
 const db = require("./db");
-const User = require("./models/user");
+// const User = require("./models/user");
 const auth = require("./routes/auth");
+const dashboard = require("./routes/dashboard");
 
 app.use(express.json());
 app.use(cookieParser());
@@ -13,6 +14,7 @@ app.get("/", async (req, res) => {
 });
 
 app.use("/auth", auth);
+app.use("/dashboard", dashboard);
 
 // app.post("/login", async (req, res) => {
 //     const { email, password } = req.body;
@@ -30,10 +32,6 @@ app.use("/auth", auth);
 
 //     // set refresh token
 // });
-
-app.get("/dashboard", async (req, res) => {
-    const { accessToken, refreshToken } = req.cookies;
-});
 
 app.listen(3000, async () => {
     console.log("server started");
