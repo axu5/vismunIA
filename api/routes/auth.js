@@ -82,6 +82,7 @@ router.post("/refresh-token", async (req, res, next) => {
 });
 
 router.delete("/logout", async (req, res) => {
+    // delete cookies from client
     Tokens.delete(res);
     res.send({ success: true });
 });
@@ -91,10 +92,11 @@ router.delete("/logout-all", async (req, res, next) => {
         const { refreshToken } = req.cookies;
         if (!refreshToken) throw "bad request";
         await Tokens.verifyRefreshToken(refreshToken);
+        // update refresh token version
         await Tokens.updateVersion(refreshToken);
+        // delete cookies from client
         Tokens.delete(res);
 
-        // update refresh token version
         res.send({ success: true });
     } catch (error) {
         next(error);
