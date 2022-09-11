@@ -75,6 +75,7 @@ router.post("/refresh-token", async (req, res, next) => {
         if (!refreshToken) throw "bad request";
 
         await Tokens.verifyRefreshToken(refreshToken);
+        res.send("tokens set");
     } catch (error) {
         next(error);
     }

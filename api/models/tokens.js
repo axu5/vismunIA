@@ -5,7 +5,7 @@ const db = require("../db");
 const {
     // @ts-ignore
     tokens: { refreshKey, accessKey: tokenKeys },
-} = require("../config.json");
+} = require("../../config.json");
 
 const tokenNames = {
     access: "accessToken",
@@ -125,9 +125,8 @@ class Tokens extends Model {
                 refreshKey,
                 async (error, payload) => {
                     if (error) {
-                        return reject(
-                            "unauthorized (incorrect token)"
-                        );
+                        // invalid token
+                        return reject("unauthorized");
                     }
                     // @ts-ignore Extract userId from audience
                     const userId = payload.aud;
@@ -144,7 +143,8 @@ class Tokens extends Model {
                         await Tokens.getVersion(userId);
                     // 2. If token versions do not match return unauthorized
                     if (correctTokenVersion !== version) {
-                        return reject("unauthorized (token version)");
+                        // invalid token version
+                        return reject("unauthorized");
                     }
 
                     // Return the userId
@@ -160,7 +160,9 @@ class Tokens extends Model {
     }
 
     static async getVersion(userId) {
-        const sessionsCollection = db.getCollection("user_sessions");
+        const sessionsCollection = db.getCollection(
+            Tokens.dataCollectionName
+        );
         const result = await sessionsCollection.findOne({ userId });
         return result.version;
     }
