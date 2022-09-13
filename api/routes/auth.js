@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require("../db");
 const Tokens = require("../models/tokens");
 const User = require("../models/user");
+const protected = require("../middleware/protected");
 
 router.post("/signup", async (req, res) => {
     const { name, email, password } = req.body;
@@ -69,25 +70,25 @@ router.post("/login", async (req, res) => {
     res.send({ success: true });
 });
 
-router.post("/refresh-token", async (req, res, next) => {
-    try {
-        const { refreshToken } = req.cookies;
-        if (!refreshToken) throw "bad request";
-
-        await Tokens.verifyRefreshToken(refreshToken);
-        res.send("tokens set");
-    } catch (error) {
-        next(error);
-    }
+router.post("/refresh-token", protected, async (req, res, next) => {
+    res.send({ success: true });
+    // try {
+    //     const { refreshToken } = req.cookies;
+    //     if (!refreshToken) throw "bad request";
+    //     await Tokens.verifyRefreshToken(refreshToken);
+    //     res.send("tokens set");
+    // } catch (error) {
+    //     next(error);
+    // }
 });
 
-router.delete("/logout", async (req, res) => {
+router.delete("/logout", protected, async (req, res) => {
     // delete cookies from client
     Tokens.delete(res);
     res.send({ success: true });
 });
 
-router.delete("/logout-all", async (req, res, next) => {
+router.delete("/logout-all", protected, async (req, res, next) => {
     try {
         const { refreshToken } = req.cookies;
         if (!refreshToken) throw "bad request";

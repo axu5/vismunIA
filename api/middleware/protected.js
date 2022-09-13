@@ -19,6 +19,6 @@ module.exports = async (req, res, next) => {
         req.userId = userId;
         return next();
     } catch (error) {
-        res.send(error);
+        res.status(400).send(error);
     }
 };
