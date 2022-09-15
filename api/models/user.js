@@ -6,6 +6,7 @@ class User extends Model {
     constructor(name, email) {
         super("users");
         this.name = name;
+        this.graduationYear = undefined;
 
         this.email = email;
         this.userId = uuid();
@@ -14,19 +15,19 @@ class User extends Model {
         this.createdAt = new Date();
 
         this.files = [];
-        this.attendance = [];
+        this.attendance = 0;
 
         this.student = true;
         this.secretaryGeneral = false;
         this.teacher = false;
     }
 
-    setPassword(password) {
-        this.password = bcrypt.hashSync(password, 12);
-    }
-
     verifyPassword(plainTextPassword) {
         return bcrypt.compareSync(plainTextPassword, this.password);
+    }
+
+    set password(password) {
+        this.password = bcrypt.hashSync(password, 12);
     }
 
     set name(name) {

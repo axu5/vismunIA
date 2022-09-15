@@ -33,7 +33,7 @@ router.post("/signup", async (req, res) => {
     }
 
     const user = new User(name, email);
-    await user.setPassword(password);
+    user.password = password;
 
     // Create tokens
     const tokens = new Tokens(user.userId);
