@@ -1,16 +1,25 @@
 const bcrypt = require("bcrypt");
-const Model = require("../model");
+const DBManager = require("../dbManager");
 const { v4: uuid } = require("uuid");
 
-class User extends Model {
+class User extends DBManager {
+    static collectionName = "users";
+
     /**
-     * @param {string} name
-     * @param {any} email
-     * @param {number} graduationYear
+     * @param {string | undefined} name
+     * @param {any | undefined} email
+     * @param {string | undefined} password
+     * @param {number | undefined} graduationYear
      */
-    constructor(name, email, graduationYear) {
-        super("users");
+    constructor(
+        name = "",
+        email = "",
+        password = "",
+        graduationYear = 0
+    ) {
+        super(User.collectionName);
         this.name = name;
+        this.password = password;
         this.graduationYear = graduationYear;
 
         this.email = email;

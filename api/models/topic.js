@@ -1,8 +1,10 @@
-const Model = require("../model");
+const DBManager = require("../dbManager");
 
-class Topic extends Model {
+class Topic extends DBManager {
+    static collectionName = "topics";
+
     constructor(name, session) {
-        super("topics");
+        super(Topic.collectionName);
 
         this.name = name;
         this.session = session;

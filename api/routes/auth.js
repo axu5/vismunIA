@@ -6,11 +6,11 @@ const User = require("../models/user");
 const protected = require("../middleware/protected");
 
 router.post("/signup", async (req, res) => {
-    const { name, email, password } = req.body;
+    const { name, email, graduationYear, password } = req.body;
 
-    if (!(name && email && password)) {
+    if (!(name && email && password && graduationYear)) {
         return res.send({
-            error: "Name, email, and password must be provided",
+            error: "Name, email, password, and graduation year must be provided",
         });
     }
 
@@ -20,11 +20,9 @@ router.post("/signup", async (req, res) => {
         });
     }
 
-    const users = db.getCollection("users");
-
-    const existingUser = await users.findOne({
-        email,
-    });
+    // @ts-ignore
+    const existingUser = new User();
+    await existingUser.load({ email });
 
     if (existingUser) {
         return res.send({
@@ -32,8 +30,7 @@ router.post("/signup", async (req, res) => {
         });
     }
 
-    const user = new User(name, email);
-    user.password = password;
+    const user = new User(name, email, password, graduationYear);
 
     // Create tokens
     const tokens = new Tokens(user.userId);
@@ -58,6 +55,7 @@ router.post("/login", async (req, res) => {
     // check that email and password are valid
     const user = new User();
     await user.load({ email });
+    // await user.load({ email });
     if (!user.name || !user.verifyPassword(password)) {
         return res.send({ error: "Invalid email or password" });
     }

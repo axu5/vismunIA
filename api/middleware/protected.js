@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const Tokens = require("../models/tokens");
+const User = require("../models/user");
 
 module.exports = async (req, res, next) => {
     try {
@@ -17,6 +18,9 @@ module.exports = async (req, res, next) => {
         if (!refreshToken) throw "bad request";
         const userId = await Tokens.verifyRefreshToken(refreshToken);
         req.userId = userId;
+        const user = new User();
+        await user.load({ userId });
+        req.user = user;
         return next();
     } catch (error) {
         res.status(400).send(error);

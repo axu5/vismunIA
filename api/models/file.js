@@ -1,8 +1,10 @@
-const Model = require("../model");
+const DBManager = require("../dbManager");
 
-class File extends Model {
+class File extends DBManager {
+    static collectionName = "files";
+
     constructor(fileName, fileURI, owner) {
-        super("files");
+        super(File.collectionName);
 
         this.fileName = fileName;
         this.fileURI = fileURI;

@@ -1,4 +1,4 @@
-const Model = require("../model");
+const DBManager = require("../dbManager");
 const jwt = require("jsonwebtoken");
 const db = require("../db");
 
@@ -12,8 +12,8 @@ const tokenNames = {
     refresh: "refreshToken",
 };
 
-class Tokens extends Model {
-    static dataCollectionName = "user_sessions";
+class Tokens extends DBManager {
+    static collectionName = "user_sessions";
 
     static accessTokenExpiresIn = 5000;
     static refreshTokenExpiresIn = 31536000000; // 365 * 24 * 60 * 60 * 1000;
@@ -29,7 +29,7 @@ class Tokens extends Model {
      * @param {string} userId the id of the user for storing in database and prevention of duplicating token
      */
     constructor(userId) {
-        super(Tokens.dataCollectionName);
+        super(Tokens.collectionName);
         super.excludeParam("refreshToken");
         super.excludeParam("accessToken");
 
@@ -102,7 +102,7 @@ class Tokens extends Model {
         const { aud: userId } = jwt.decode(token, refreshKey);
         // in sessions database increment version
         const sessionsCollection = db.getCollection(
-            Tokens.dataCollectionName
+            Tokens.collectionName
         );
         const { version } = await sessionsCollection.findOne({
             userId,
@@ -161,7 +161,7 @@ class Tokens extends Model {
 
     static async getVersion(userId) {
         const sessionsCollection = db.getCollection(
-            Tokens.dataCollectionName
+            Tokens.collectionName
         );
         const result = await sessionsCollection.findOne({ userId });
         return result.version;

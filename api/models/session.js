@@ -1,8 +1,9 @@
-const Model = require("../model");
+const DBManager = require("../dbManager");
 
-class Session extends Model {
+class Session extends DBManager {
+    static collectionName = "sessions";
     constructor(date, room, topic, time, length) {
-        super("sessions");
+        super(Session.collectionName);
 
         this.date = date;
         this.room = room;
