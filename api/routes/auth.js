@@ -20,7 +20,12 @@ router.post("/signup", async (req, res) => {
         });
     }
 
-    // @ts-ignore
+    if (graduationYear < new Date().getFullYear()) {
+        return res.send({
+            error: "Invalid graduation year",
+        });
+    }
+
     const existingUser = new User();
     await existingUser.load({ email });
 

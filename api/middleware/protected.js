@@ -23,6 +23,6 @@ module.exports = async (req, res, next) => {
         req.user = user;
         return next();
     } catch (error) {
-        res.status(400).send(error);
+        return res.status(400);
     }
 };

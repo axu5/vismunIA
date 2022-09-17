@@ -44,21 +44,11 @@ class User extends DBManager {
     }
 
     /**
-     * @param {number} year
-     */
-    set graduationYear(year) {
-        year = Number(year);
-        if (isNaN(year) || year < new Date().getFullYear()) {
-            throw "cannot set graduation in the past";
-        }
-        this.graduationYear = year;
-    }
-
-    /**
      * Hash the password when set
      * @param {string} password
      */
     set password(password) {
+        if (password == "") return;
         this.password = bcrypt.hashSync(password, 12);
     }
 
