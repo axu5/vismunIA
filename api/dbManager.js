@@ -40,19 +40,24 @@ class DBManager {
      * @param {Object} query The MongoDB query
      */
     async load(query) {
-        console.log(
-            "this is an instance of user:"
-            // this instanceof User
-        );
         const collection = db.getCollection(this.collectionName);
 
         const data = await collection.findOne(query);
-        if (!data) return null;
+        if (data == null) return false;
 
         for (const [key, value] of Object.entries(data)) {
             if (key === "_id") continue;
             this[key] = value;
         }
+
+        return true;
+    }
+
+    static async getCollection(collectionName, query) {
+        const collection = db.getCollection(collectionName);
+        const data = await collection.findOne(query);
+
+        return data;
     }
 }
 

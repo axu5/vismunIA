@@ -19,6 +19,7 @@ class User extends DBManager {
     ) {
         super(User.collectionName);
         this.name = name;
+        this.pw = "";
         this.password = password;
         this.graduationYear = graduationYear;
 
@@ -40,7 +41,7 @@ class User extends DBManager {
      * @param {string | Buffer} plainTextPassword
      */
     verifyPassword(plainTextPassword) {
-        return bcrypt.compareSync(plainTextPassword, this.password);
+        return bcrypt.compareSync(plainTextPassword, this.pw);
     }
 
     /**
@@ -48,8 +49,7 @@ class User extends DBManager {
      * @param {string} password
      */
     set password(password) {
-        if (password == "") return;
-        this.password = bcrypt.hashSync(password, 12);
+        this.pw = bcrypt.hashSync(password, 12);
     }
 
     /**
@@ -68,6 +68,13 @@ class User extends DBManager {
      */
     get name() {
         return `${this.firstName} ${this.lastName}`;
+    }
+
+    static async load(query) {
+        const user = new User();
+        const success = await user.load(query);
+
+        return success ? user : null;
     }
 }
 

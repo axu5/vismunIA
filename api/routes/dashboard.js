@@ -6,7 +6,8 @@ router.use(protected);
 
 router.get("/", (req, res) => {
     // @ts-ignore
-    res.send({ userId: req.userId });
+    const { user } = req;
+    res.send({ userId: user.userId, user });
 });
 
 module.exports = router;

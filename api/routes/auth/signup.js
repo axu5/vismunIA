@@ -23,22 +23,24 @@ module.exports = async (req, res) => {
         });
     }
 
-    const existingUser = new User();
-    await existingUser.load({ email });
+    const existingUser = await User.load({ email });
 
-    if (existingUser) {
+    if (existingUser != null) {
         return res.send({
-            error: "User with that email or name already exists",
+            error: "User with that email already exists",
         });
     }
 
+    console.log("new user...");
     const user = new User(name, email, password, graduationYear);
 
     // Create tokens
+    console.log("tokens...");
     const tokens = new Tokens(user.userId);
     tokens.setTokens(res);
     tokens.save();
 
+    console.log("saving...");
     await user.save();
     res.send({ success: true });
 };
